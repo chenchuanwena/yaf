@@ -1,0 +1,228 @@
+
+    <style type="text/css">
+        .tools{margin-bottom:40px;}
+        .btn.disable{background-color:#999;}
+
+    </style>
+
+
+    <!-- 标题栏 -->
+    <div class="main-title">
+        <h2>开发中</h2>
+    </div>
+    <div class="tools"><div style="float: left;"><a class="btn" href="/Main/add">新 增</a>
+    </div>
+    <!-- 数据列表 -->
+    <table id="dg" ></table>
+
+    <script type="text/javascript">
+        var url = "/Main/getJson/";
+        function initDatagrid() {
+            $('#dg').datagrid({
+                columns: [[
+                    {field: 'uid', title: 'ID', width: 150, align: 'center', resizable: true, sortable: false},
+                    {field: 'nickname', title: '账号', width: 80, align: 'center', resizable: true, sortable: false, order: 'desc'},
+                    {field: 'name', title: '昵称', width: 100, sortable: false, align: 'center'},
+
+                    {field: 'status', title: '状态', width: 50, align: 'center', formatter: function (value, row, index) {
+                        if(value==-1){
+                            return '已删除';
+                        }
+                        if (value == 0) {
+                            return '禁用';
+                        } else {
+                            return "正常";
+                        }
+                    }},
+                    {field: 'cid', title: '操作', width: 180, align: 'center', formatter: function (value, row, index) {
+                        var va = "";
+                        if (row.status == 1) {
+                            va += String.format('<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="changeStatus({0})">禁用</a>&nbsp;&nbsp', row.uid);
+                        } else {
+                            va += String.format('<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="resume({0})">启用</a>&nbsp;&nbsp',row.uid);
+                        }
+                        va += String.format('<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="del({0})">删除</a>', row.uid);
+                        return String.format('<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="edit({0})">查看/编辑</a>&nbsp;&nbsp{1}', row.uid, va);
+                    }
+                    }
+                ]], //columns 列的数组属性
+                fitColumns: 'true', //当此属性为true时所有列会均匀的充满datagrid的宽度,True 就会自动扩大或缩小列的尺寸以适应表格的宽度并且防止水平滚动
+                autoRowHeight: 'true', //当true时，根据内容调整表格行的高度
+                striped: 'true', //为true就是隔行变色
+                method: 'post', //请求远程数据的请求方法
+                idField: 'id', //标识字段,主键的字段
+                url: url, //从远程站点获得数据的 URL默认post过去两个参数page:第几页,rows:每页的条数
+                loadMsg: '加载数据的时候,请稍等', //从远处加载数据，正在加载的提示信息
+                pagination: true, //为true时显示分页工具栏在datagrid 底部,默认为false
+                singleSelect: false, //为true的时候只能单行选择，默认为false的时候可以选择多行
+                ctrlSelect: true, //为true时按着ctrl可以选多行
+                pagePosition: 'bottom', //设置分页控件的位置，默认为bottom，在griddata的下方  有值'top','bottom','both'.both是上下都显示
+                pageNumber: 1, //初始化是第几页
+                pageSize: 10, //每页多少条记录
+
+                sortName: 'intime', //定义哪些列可排序，默认为null//排序的时候会传两个参数，一个是sort:排序的字段，order：默认排序的方式
+                rowStyler: function (index, row) {
+
+                }, //行下标可整除2,字体颜色设置成green
+                onCheckAll: function (data) {
+                    $("#del").removeClass("disable");
+                    $("#changeStatus").removeClass("disable");
+                },
+                onUncheckAll: function (data) {
+                    $("#del").addClass("disable");
+                    $("#changeStatus").addClass("disable");
+                },
+                onCheck: function (data) {
+                    checkAll();
+                },
+                onUncheck: function (data) {
+                    checkAll();
+                },
+                onBeforeEdit: function (index, row) {
+                    row.editing = true;
+                },
+                onAfterEdit: function (index, row) {
+                    alert(33)
+                },
+                width: '100%'
+            });
+            formatpagenation('dg');
+        }
+        function reset(va) {
+            var deleteUrl = "{:U('changeStatus?method=reset')}";
+            deleteUrl = deleteUrl.replace(".html", "/id/" + va + ".html");
+            $.messager.confirm('提示信息', '确定要重置密码吗？', function (result) {
+                if (!result)
+                    return false;
+                $.get(deleteUrl, function (res) {
+                    if (!res.status) {
+                        $.messager.alert('提示信息', res.info, 'error');
+                    } else {
+                        $.messager.alert('提示信息', res.info, 'success');
+                        $('#dg').datagrid('reload');
+                    }
+                }, 'json');
+            });
+        }
+        function resume(va) {
+            var deleteUrl = "/Main/changeStatus/?method=resumeuser&id="+va;
+            $.messager.confirm('提示信息', '确定要启用吗？', function (result) {
+                if (!result)
+                    return false;
+                $.get(deleteUrl, function (res) {
+                    if (!res.status) {
+                        $.messager.alert('提示信息', res.info, 'error');
+                    } else {
+                        $.messager.alert('提示信息', res.info, 'success');
+                        $('#dg').datagrid('reload');
+                    }
+                }, 'json');
+            });
+        }
+        function del(va) {
+            var deleteUrl = "/Main/changeStatus/?method=deleteuser&id="+va;
+            $.messager.confirm('提示信息', '确定要删除吗？', function (result) {
+                if (!result)
+                    return false;
+                $.get(deleteUrl, function (res) {
+                    if (!res.status) {
+                        $.messager.alert('提示信息', res.info, 'error');
+                    } else {
+                        $.messager.alert('提示信息', res.info, 'success');
+                        $('#dg').datagrid('reload');
+                    }
+                }, 'json');
+            });
+        }
+
+        function changeStatus(va) {
+            var deleteUrl = "/Main/changeStatus/?method=forbiduser&id="+va;
+            $.messager.confirm('提示信息', '确定要禁用吗？', function (result) {
+                if (!result)
+                    return false;
+                $.get(deleteUrl, function (res) {
+                    if (!res.status) {
+                        $.messager.alert('提示信息', res.info, 'error');
+                    } else {
+                        $.messager.alert('提示信息', res.info, 'success');
+                        $('#dg').datagrid('reload');
+                    }
+                }, 'json');
+            });
+        }
+        function edit(va) {
+            var editUrl = "/Main/edit/?id="+va;
+            window.location.href = editUrl;
+        }
+
+        $(document).ready(function () {
+            //导航高亮
+            highlight_subnav("{:U('index')}");
+            initDatagrid();
+            formatpagenation('dg');
+            //设置分页控件
+
+        });
+        function publish(id) {
+            var data = {id: id, status: "1"};
+            $.messager.confirm('提示信息', '确定要发布资讯吗？', function (result) {
+                if (!result)
+                    return false;
+                $.post("{:U('Industry/changeStatus?method=edit')}", data, function (data) {
+                    $.messager.alert('提示框', data.info);
+                    window.location.reload();
+                });
+            })
+        }
+        function EditChange(id, obj) {
+            var data = {id: id, sort: $(obj).val()};
+            $.post("{:U('Industry/changeStatus?method=edit')}", data, function (data) {
+                $.messager.alert('提示框', data.info);
+            });
+        }
+        function checkAll() {
+            var checked = false;
+            $.each($("input[name='id']"), function (index, item) {
+                if ($(item).attr("checked") == 'checked') {
+                    checked = true;
+                }
+            });
+            if (checked) {
+                $("#changeStatus").removeClass("disable");
+                $("#del").removeClass("disable");
+            } else {
+                $("#changeStatus").addClass("disable");
+                $("#del").addClass("disable");
+            }
+        }
+        $("#del").click(function () {
+            if ($(this).hasClass("disable")) {
+                return false;
+            }
+            var id = '0';
+            $.each($("input[name='id']"), function (index, item) {
+                if ($(item).attr("checked") == 'checked') {
+                    id += "," + $(item).val();
+                }
+            });
+            del(id);
+        })
+        $("#changeStatus").click(function () {
+            if ($(this).hasClass("disable")) {
+                return false;
+            }
+            var id = '0';
+            $.each($("input[name='id']"), function (index, item) {
+                if ($(item).attr("checked") == 'checked') {
+                    id += "," + $(item).val();
+                }
+            });
+            changeStatus(id);
+        })
+    </script>
+
+
+<script type="text/javascript">
+    //导航高亮
+    highlight_subnav('/Options/index');
+</script>

@@ -1,0 +1,75 @@
+    <div class="content">
+        <div class="header">
+            <h1 class="page-title">管理员列表</h1>
+        </div>
+            <ul class="breadcrumb">
+                <li><a href="/">后台管理</a> <span class="divider">/</span></li>
+                <li><a href="#">管理员设置</a> <span class="divider">/</span></li>
+                <li class="active">编辑管理员</li>
+            </ul>
+        <div class="container-fluid">
+            <div class="row-fluid">
+<div class="well">
+    <ul class="nav nav-tabs">
+      <li class="active"><a href="#">填写信息</a></li>
+    </ul>
+    <div id="myTabContent" class="tab-content">
+      <div class="tab-pane active in" id="home">
+    <form id="tab">
+        <label>用户名</label>
+        <input type="text" name="username" id="username" value="<?php echo $UsrInfo['username'];?>"/>
+        <label>密码</label>
+        <input type="password" name="password" id="password" value=""/>        
+        <label>确认密码</label>
+        <input type="password" name="repassword" id="repassword" value=""/>        
+        <label>昵称</label>
+        <input type="text" name="nickname" id="nickname" value="<?php echo $UsrInfo['nickname'];?>"/>
+        <label>真实姓名</label>
+        <input type="text" name="realname" id="realname" value="<?php echo $UsrInfo['realname'];?>"/>
+        <label>邮箱</label>
+        <input type="text" name="email" id="email" value="<?php echo $UsrInfo['email'];?>"/>
+        <input type="hidden" name="id" id="id" value=<?php echo $UsrInfo['id']; ?> />
+        <div class="btn-toolbar">
+            <a  class="btn btn-primary" id="sure">确定</a>
+        </div>        
+    </form>
+      </div>
+  </div>
+</div>
+<script type="text/javascript">
+$(function(){
+    $('#sure').click(function(){
+        $.ajax({
+                    url:'/admin/edit/',
+                    type:'POST',
+                    data:{
+                      id:$("#id").val(),
+                      username:$("#username").val(),
+                      password:$("#password").val(),
+                      repassword:$("#repassword").val(),
+                      nickname:$("#nickname").val(),
+                      realname:$("#realname").val(),
+                      email:$("#email").val()
+                    },
+                    dataType:'json',
+                    success:function(msg){
+                      if(msg.errno==0){
+                        alert(msg.errmsg);
+                      }else{
+                        alert(msg.errmsg);
+                      }
+                    }
+        })
+    })
+})
+</script>
+              <footer>
+                  <hr>
+                  <!-- Purchase a site license to remove this link from the footer: http://www.portnine.com/bootstrap-themes -->
+                  <p class="pull-right">A <a href="http://www.portnine.com/bootstrap-themes" target="_blank">Free Bootstrap Theme</a> by <a href="http://www.portnine.com" target="_blank">Portnine</a></p>
+
+                  <p>&copy; 2013 <a href="http://www.juaiwan.com" target="_blank">XXX</a></p>
+              </footer>
+            </div>
+        </div>
+    </div>
